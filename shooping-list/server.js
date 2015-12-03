@@ -18,27 +18,40 @@ Storage.prototype.add = function(name) {
 
 // Query the item with input id
 Storage.prototype.find = function(id) {
-	if (id >= this.id || id < 0)
-		return undefined;
-		
-	var item = this.items[id];
-	return item;
+	console.log("find:"+id);
+	for (var i = 0; i < this.items.length; ++i)
+	{
+		var item = this.items[i];
+		console.log(item.id+item.name+(item.id == id));
+		if (item.id == id)
+			return item;
+	}		
+	
+	return undefined;
 };
 
 // Delete the item with input id
 Storage.prototype.delete = function(id){
-	if (id >= this.id || id < 0)
-		return;
+	var item = this.find(id);
+	if (item === undefined)
+		return undefined;
 	
-	delete this.items[id];
+	var index = this.items.indexOf(item);
+	console.log("delete"+index);
+	this.items.splice(index, 1);
+	return item;
 };
 
 // Update the item with input id
 Storage.prototype.update = function(id, name){
-	if (id >= this.id || id < 0)
-		return;
+	var item = this.find(id);
+	if (item === undefined)
+		return this.add(name);
 	
-	this.items[id].name = name;
+	var index = this.items.indexOf(item);
+	console.log("find"+index);
+	this.items[index].name = name;
+	return this.items[index];
 };
 
 
@@ -60,19 +73,14 @@ app.post('/items', jsonParser, function(req, res) {
     }
 
     var item = storage.add(req.body.name);
-	console.log(storage.items);
     res.status(201).json(item);
 });
 
 app.delete('/items/:id', function(req, res){
-	var item = storage.find(req.params.id)
+	var item = storage.delete(req.params.id)
 	if (item === undefined){
 		res.status(404).json("Err: Incorrect id.");
 	} else {
-		// update the array?
-		// if need to delete the undefined item in the array, use slice.
-		storage.delete(item.id);
-		console.log(storage.items);
 		res.status(200).json(item);
 	}
 });
@@ -82,15 +90,15 @@ app.put('/items/:id', jsonParser, function(req, res){
         return res.sendStatus(400);
     }
 	
-	var item = storage.find(req.params.id)
-	console.log(item);
+	var item = storage.update(req.params.id, req.body.name);
 	if (item === undefined){
-		storage.add(req.body.name);
+		res.status(404).json("Err: Incorrect id.");
 	} else {
-		storage.update(req.params.id, req.body.name);
-		console.log(storage.items);
-		res.status(200).json(storage.items[item.id]);
+		res.status(200).json(item);
 	}
 });
 
 app.listen(process.env.PORT || 8080);
+
+exports.app = app;
+exports.storage = storage;
