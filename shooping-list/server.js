@@ -18,11 +18,9 @@ Storage.prototype.add = function(name) {
 
 // Query the item with input id
 Storage.prototype.find = function(id) {
-	console.log("find:"+id);
 	for (var i = 0; i < this.items.length; ++i)
 	{
 		var item = this.items[i];
-		console.log(item.id+item.name+(item.id == id));
 		if (item.id == id)
 			return item;
 	}		
@@ -37,7 +35,6 @@ Storage.prototype.delete = function(id){
 		return undefined;
 	
 	var index = this.items.indexOf(item);
-	console.log("delete"+index);
 	this.items.splice(index, 1);
 	return item;
 };
@@ -49,7 +46,6 @@ Storage.prototype.update = function(id, name){
 		return this.add(name);
 	
 	var index = this.items.indexOf(item);
-	console.log("find"+index);
 	this.items[index].name = name;
 	return this.items[index];
 };
@@ -64,7 +60,7 @@ var app = express();
 app.use(express.static('public'));
 
 app.get('/items', jsonParser, function(req, res) {
-    res.json(storage.items);
+    res.status(200).json(storage.items);
 });
 
 app.post('/items', jsonParser, function(req, res) {
